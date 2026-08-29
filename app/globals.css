@@ -1,26 +1,249 @@
 @import "tailwindcss";
 
+/* ═════════════════════════════════════
+   1.  TOKENS — the only place a hex/rgba value should ever appear
+   ═════════════════════════════════════ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:            #080808;
+  --bg-subtle:     #0f0f0f;
+  --bg-panel:      #141414;
+  --bg-raised:     #1a1a1a;
+
+  --text:          #ededed;
+  --text-muted:    #888888;
+  --text-dim:      #444444;
+
+  --border:        rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+
+  --accent:        #6366f1;
+  --accent-light:  #818cf8;
+  --accent-glow:   rgba(99, 102, 241, 0.22);
+  --accent-glow-s: rgba(99, 102, 241, 0.08);
+
+  --green:  #22c55e;
+  --yellow: #eab308;
+  --red:    #ef4444;
+
+  --font-display: 'Manrope', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
 }
 
+[data-theme='light'] {
+  --bg:            #f2f2f2;
+  --bg-subtle:     #fafafa;
+  --bg-panel:      #ebebeb;
+  --bg-raised:     #e4e4e4;
+  --text:          #0a0a0a;
+  --text-muted:    #666666;
+  --text-dim:      #aaaaaa;
+  --border:        rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --accent:        #4f46e5;
+  --accent-light:  #6366f1;
+  --accent-glow:   rgba(79, 70, 229, 0.18);
+  --accent-glow-s: rgba(79, 70, 229, 0.06);
+}
+
+/* Tells Tailwind which utility classes to generate from the tokens
+   above — bg-bg, bg-bg-panel, text-text-muted, border-border,
+   text-accent, font-display, font-mono, etc. Nothing else needed. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg:            var(--bg);
+  --color-bg-subtle:     var(--bg-subtle);
+  --color-bg-panel:      var(--bg-panel);
+  --color-bg-raised:     var(--bg-raised);
+
+  --color-text:          var(--text);
+  --color-text-muted:    var(--text-muted);
+  --color-text-dim:      var(--text-dim);
+
+  --color-border:        var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-accent:        var(--accent);
+  --color-accent-light:  var(--accent-light);
+  --color-accent-glow:   var(--accent-glow);
+  --color-accent-glow-s: var(--accent-glow-s);
+
+  --color-green:  var(--green);
+  --color-yellow: var(--yellow);
+  --color-red:    var(--red);
+
+  --font-display: var(--font-display);
+  --font-mono:    var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ═════════════════════════════════════
+   2.  BASE RESET & GLOBALS
+   ═════════════════════════════════════ */
+
+*,
+::before,
+::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-display);
+  background-color: var(--bg);
+  color: var(--text);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+#root, #__next { height: 100%; }
+
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
+::selection { background: var(--accent-glow); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ═════════════════════════════════════
+   3.  KEYFRAMES
+   ═════════════════════════════════════ */
+
+@keyframes dashFlow      { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -80; } }
+@keyframes dashFlowRev   { from { stroke-dashoffset: 0; } to { stroke-dashoffset:  80; } }
+@keyframes floatY        { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+@keyframes blinkCursor   { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes revealUp      { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scanLine      { 0% { top: -4px; } 100% { top: 100%; } }
+@keyframes dotPulse      { 0%,100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+@keyframes corePulse     { 0%,100% { opacity: 0.8; filter: blur(0px); } 50% { opacity: 1; filter: blur(1px); } }
+@keyframes glowPulse     { 0%,100% { opacity: 0.15; } 50% { opacity: 0.35; } }
+@keyframes typing        { from { width: 0; } to { width: 100%; } }
+@keyframes slideRight    { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes countUp       { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmer       { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes borderFlow    { 0%,100% { border-color: var(--border); } 50% { border-color: var(--accent); } }
+
+/* ═════════════════════════════════════
+   4.  ANIMATION UTILITY CLASSES
+   ═════════════════════════════════════ */
+
+.anim-float        { animation: floatY 6s ease-in-out infinite; }
+.anim-blink        { animation: blinkCursor 1s step-end infinite; }
+.anim-scan         { animation: scanLine 2.5s linear infinite; }
+.anim-dot-pulse    { animation: dotPulse 2s ease-in-out infinite; }
+.anim-fade         { animation: fadeIn 0.4s ease forwards; }
+.anim-reveal       { animation: revealUp 0.6s ease forwards; }
+.anim-slide-right  { animation: slideRight 0.5s ease forwards; }
+.anim-core-pulse   { animation: corePulse 3s ease-in-out infinite; }
+.anim-glow-pulse   { animation: glowPulse 3s ease-in-out infinite; }
+
+/* ═════════════════════════════════════
+   5.  REUSABLE COMPONENT PATTERNS
+   ═════════════════════════════════════ */
+
+.status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: dotPulse 2s ease-in-out infinite;
+  background: var(--green);
+}
+
+.terminal-window {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+}
+.terminal-titlebar {
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.terminal-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+.terminal-dot.red   { background: var(--red); }
+.terminal-dot.yellow{ background: var(--yellow); }
+.terminal-dot.green { background: var(--green); }
+
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent), transparent);
+  opacity: 0.3;
+  animation: scanLine 2.5s linear infinite;
+  pointer-events: none;
+}
+
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.divider-accent {
+  width: 1px;
+  height: 12px;
+  background: var(--border-strong);
+}
+
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.section       { padding: 120px 0; }
+.section-tight { padding: 100px 0; }
+.container     { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 14px 28px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 8px 32px var(--accent-glow);
+}
+.btn-primary:hover { opacity: 0.88; transform: translateY(-2px); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 14px 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }

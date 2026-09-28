@@ -1,18 +1,27 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+
+export type ProfileTab =
+  | "overview"
+  | "repositories"
+  | "projects"
+  | "packages"
+  | "stars";
 
 interface AppContextType {
   isDark: boolean;
   toggleTheme: () => void;
-  language: string;
-  setLanguage: (l: string) => void;
   cmdOpen: boolean;
   setCmdOpen: (v: boolean) => void;
-  aiOpen: boolean;
-  setAiOpen: (v: boolean) => void;
-  devMode: boolean;
-  toggleDevMode: () => void;
+  tab: ProfileTab;
+  setTab: (t: ProfileTab) => void;
 }
 
 const AppContext = createContext<AppContextType>({} as AppContextType);
@@ -23,47 +32,43 @@ export function useApp() {
 
 export default function AppProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(true);
-  const [language, setLanguage] = useState("EN");
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
-  const [devMode, setDevMode] = useState(false);
+  const [tab, setTab] = useState<ProfileTab>("overview");
 
   const toggleTheme = () => setIsDark((p) => !p);
-  const toggleDevMode = () => setDevMode((p) => !p);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
   }, [isDark]);
 
+  /* ⌘K / Ctrl+K toggles the command palette; "/" opens it like GitHub;
+     Escape closes everything. */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      const target = e.target as HTMLElement | null;
+      const typing =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setCmdOpen((p) => !p);
-      }
-      if (e.key === "Escape") {
+      } else if (e.key === "/" && !typing && !cmdOpen) {
+        e.preventDefault();
+        setCmdOpen(true);
+      } else if (e.key === "Escape") {
         setCmdOpen(false);
-        setAiOpen(false);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [cmdOpen]);
 
   return (
     <AppContext.Provider
-      value={{
-        isDark,
-        toggleTheme,
-        language,
-        setLanguage,
-        cmdOpen,
-        setCmdOpen,
-        aiOpen,
-        setAiOpen,
-        devMode,
-        toggleDevMode,
-      }}
+      value={{ isDark, toggleTheme, cmdOpen, setCmdOpen, tab, setTab }}
     >
       {children}
     </AppContext.Provider>
